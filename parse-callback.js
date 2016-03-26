@@ -5,6 +5,7 @@ const debug = require('debug')('hello');
 const fs = require('fs');
 const parse = require('csv-parse');
 const helper = require('./helper');
+const moduleCsv = require('./class-csv');
 
 // 0. Naïve
 
@@ -17,7 +18,8 @@ function naive() {
 
                 let line = parsed[index];
 
-                // FIXME: Put your transformation here
+                let csv = new moduleCsv.dataCsv(line);
+                line = csv.mergeName();
 
                 if (index > 0) {
                     debug(`sending data index: ${index - 1}`);
