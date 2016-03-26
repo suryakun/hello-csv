@@ -11,69 +11,69 @@ const async  = require('async');
 class PromiseParse {
 
 	readFile() {
-		return new Promise(resolve  => {
-			fs.readFile(__dirname + '/sample.csv', (err, loadedCsv) => {
-				parse(loadedCsv, (err, parsed) => {
-					if (err) callback(new Error('Error reading file'));
-					resolve(parsed);
-				})
-			});
-		})
+    return new Promise(resolve  => {
+        fs.readFile(__dirname + '/sample.csv', (err, loadedCsv) => {
+            parse(loadedCsv, (err, parsed) => {
+                if (err) callback(new Error('Error reading file'));
+                resolve(parsed);
+            });
+        });
+    });
 	}
 
 	loopingLine(parsed, callback) {
-		for (let index in parsed) {
-			if (index > 0) {
-				let line = parsed[index];
-				let csv = new moduleCsv.dataCsv(line);
-	            line = csv.mergeName();
-	            debug(`sending data index: ${index - 1}`);
-				callback(line);
-			};
-		};
+    for (let index in parsed) {
+        if (index > 0) {
+            let line = parsed[index];
+            let csv = new moduleCsv.dataCsv(line);
+            line = csv.mergeName();
+            debug(`sending data index: ${index - 1}`);
+            callback(line);
+        };
+    };
 	}
 
 	sendSms(line) {
-		return new Promise((resolve, reject) => {
-			helper.sendSms(line, (err, sendingStatus) => {
-		        let lineToLog;
-		        if (err) {
-		            debug(err.message);
+    return new Promise((resolve, reject) => {
+        helper.sendSms(line, (err, sendingStatus) => {
+            let lineToLog;
+            if (err) {
+                debug(err.message);
 
-		            lineToLog = {
-		                sendingStatus,
-		                line,
-		            };
-		            resolve(lineToLog);
-		        } else {
-			        reject(null);
-		        }
-		    });
-		})
+                lineToLog = {
+                    sendingStatus,
+                    line,
+                };
+                resolve(lineToLog);
+            } else {
+                reject(null);
+            }
+        });
+    });
 	}
 
 	logToS3(lineToLog) {
-		if (lineToLog) {
-			helper.logToS3(lineToLog, (err, loggingStatus) => {
-	            if (err) {
-	                debug(err.message);
-	            } else {
-		            debug(loggingStatus);
-	            }
-	        });				
-		};
+    if (lineToLog) {
+        helper.logToS3(lineToLog, (err, loggingStatus) => {
+            if (err) {
+                debug(err.message);
+            } else {
+                debug(loggingStatus);
+            }
+        });
+    };
 	}
 
 	main() {
-		var self = this;
-		self.readFile()
-			.then((parsed) => {
-				self.loopingLine(parsed, (line) => {
-					self.sendSms(line).then((line) => {
-						self.logToS3(line);
-					});
-				});
-			});
+    var _this = this;
+    _this.readFile()
+		.then((parsed) => {
+    _this.loopingLine(parsed, (line) => {
+        _this.sendSms(line).then((line) => {
+            _this.logToS3(line);
+        });
+    });
+		});
 	}
 
 }
